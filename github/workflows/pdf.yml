@@ -1,0 +1,41 @@
+name: Build JLPT N4 PDFs
+
+on: push: branches: ["feature/jlpt-n4-2024-pdfs"] workflow_dispatch:
+
+jobs: build: runs-on: ubuntu-latest steps: - name: Checkout uses: actions/checkout@v4
+
+Code
+  - name: Setup Pandoc and LaTeX
+    run: |
+      sudo apt-get update
+      sudo apt-get install -y pandoc texlive-latex-extra texlive-fonts-recommended fonts-noto fonts-noto-cjk
+
+  - name: Ensure output directory
+    run: |
+      mkdir -p docs/jlpt-n4
+
+  - name: Build 2024/07 PDF
+    run: |
+      pandoc manuscript/07/index.md \
+        -o docs/jlpt-n4/jlpt-n4-2024-07.pdf \
+        --pdf-engine=xelatex \
+        -V mainfont="Noto Serif JP" -V sansfont="Noto Sans JP" \
+        --toc --toc-depth=3 \
+        -V geometry:margin=1in \
+        --metadata title="JLPT N4 2024/07 題本（不含答案）"
+
+  - name: Build 2024/12 PDF
+    run: |
+      pandoc manuscript/12/index.md \
+        -o docs/jlpt-n4/jlpt-n4-2024-12.pdf \
+        --pdf-engine=xelatex \
+        -V mainfont="Noto Serif JP" -V sansfont="Noto Sans JP" \
+        --toc --toc-depth=3 \
+        -V geometry:margin=1in \
+        --metadata title="JLPT N4 2024/12 題本（不含答案）"
+
+  - name: Upload PDFs as artifacts
+    uses: actions/upload-artifact@v4
+    with:
+      name: jlpt-n4-pdfs
+      path: docs/jlpt-n4/*.pdf
